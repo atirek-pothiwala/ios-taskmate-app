@@ -7,12 +7,36 @@
 
 import SwiftUI
 
+typealias OnBackButtonClick = () -> Void
+
 struct BackButtonView: View {
+    
+    let title: String
+    let onBackButtonClick: OnBackButtonClick
+    
+    init(title: String, onBackButtonClick: @escaping OnBackButtonClick) {
+        self.title = title
+        self.onBackButtonClick = onBackButtonClick
+    }
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        Button {
+            onBackButtonClick()
+        } label: {
+            Image(systemName: "chevron.backward")
+                .font(.title3)
+                .fontWeight(.regular)
+            
+            Text(title)
+                .font(.title3)
+                .fontWeight(.regular)
+        }.foregroundStyle(.black)
+
     }
 }
 
 #Preview {
-    BackButtonView()
+    BackButtonView(title: "Go Back") {
+        debugPrint("Back Button Event: On Click")
+    }
 }

@@ -1,5 +1,5 @@
 //
-//  BlinkImageView.swift
+//  ColorAnimationImageView.swift
 //  taskmate
 //
 //  Created by Atirek Pothiwala on 15/12/24.

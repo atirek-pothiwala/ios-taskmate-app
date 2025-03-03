@@ -7,18 +7,22 @@
 
 import SwiftUI
 
+typealias OnSaveTextEvent = (String) -> Void
+
 struct TextFieldSheet: View {
     
     @Binding private var isPresent: Bool
     @FocusState private var isFocused: Bool
     
     private let title: String
-    @Binding private var message: String
+    @State private var input: String = ""
+    private let onSaveTextEvent: OnSaveTextEvent
     
-    init(isPresent: Binding<Bool>, title: String, message: Binding<String>) {
+    init(isPresent: Binding<Bool>, title: String, input: String, onSaveTaskEvent: @escaping OnSaveTextEvent) {
         self._isPresent = isPresent
         self.title = title
-        self._message = message
+        self.input = input
+        self.onSaveTextEvent = onSaveTaskEvent
     }
     
     @State private var sheetHeight: CGFloat = .zero
@@ -34,7 +38,7 @@ struct TextFieldSheet: View {
             Spacer()
             
             Button {
-                isPresent.toggle()
+                isPresent = false
             } label: {
                 Image.init(systemName: "xmark")
                     .foregroundStyle(.black)
@@ -44,7 +48,7 @@ struct TextFieldSheet: View {
         .padding(.all, 20)
     }
     var textField: some View {
-        TextField(text: $message, axis: .vertical) {
+        TextField(text: $input, axis: .vertical) {
             Text("Type here...")
                 .foregroundStyle(.gray)
         }
@@ -68,7 +72,8 @@ struct TextFieldSheet: View {
     }
     var btnSave: some View {
         Button {
-
+            isPresent = false
+            onSaveTextEvent(input)
         } label: {
             Text("Save")
                 .font(.title2)
@@ -78,40 +83,25 @@ struct TextFieldSheet: View {
         }
         .frame(minWidth: 200, maxWidth: .infinity)
         .foregroundColor(.white)
-        .disabled(message.isEmpty)
-        .background(message.isEmpty ? Color .gray.opacity(0.5) : Color.black)
+        .disabled(input.isEmpty)
+        .background(input.isEmpty ? Color .gray.opacity(0.5) : Color.black)
     }
     
     var body: some View {
         VStack(alignment: .leading) {
             header
-            
             textField
                 .padding(.horizontal, 20)
                 .padding(.bottom, 20)
-            
             btnSave
                 .ignoresSafeArea()
         }
-        .overlay {
-            GeometryReader { geometry in
-                Color.clear.preference(key: InnerHeightPreferenceKey.self, value: geometry.size.height)
-            }
-        }
-        .onPreferenceChange(InnerHeightPreferenceKey.self) { newHeight in
-            self.sheetHeight = newHeight
-        }
-        .presentationDetents([.height(sheetHeight)])
-    }
-}
-
-fileprivate struct InnerHeightPreferenceKey: PreferenceKey {
-    static let defaultValue: CGFloat = .zero
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
+        .toResizableSheet(height: $sheetHeight)
     }
 }
 
 #Preview {
-    TextFieldSheet(isPresent: Binding.constant(false), title: "Task Description", message: Binding.constant(""))
+    TextFieldSheet(isPresent: Binding.constant(false), title: "Task Description", input: "") { input in
+        debugPrint("Input: \(input)")
+    }
 }

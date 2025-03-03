@@ -1,5 +1,5 @@
 //
-//  ColorExtension.swift
+//  Color+Extension.swift
 //  taskmate
 //
 //  Created by Atirek Pothiwala on 17/12/24.

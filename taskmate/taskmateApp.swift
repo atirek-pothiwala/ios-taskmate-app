@@ -13,8 +13,7 @@ struct taskmateApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environment(\.managedObjectContext, persistenceController.container.viewContext)
+            LoginPage().environment(\.managedObjectContext, persistenceController.container.viewContext)
         }
     }
 }

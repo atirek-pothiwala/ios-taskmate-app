@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-typealias OnSaveDateEvent = (Date) -> Void
+typealias OnSaveTimelineEvent = (Date, Int) -> Void
 
 struct TimelinePickerSheet: View {
     
@@ -15,15 +15,17 @@ struct TimelinePickerSheet: View {
     @FocusState private var isFocused: Bool
     
     private let title: String
-    @State private var input = Date.now
+    @State private var date: Date = Date.now
+    @State private var hours: Int = 1
     @State private var sheetHeight: CGFloat = .zero
-    private let onSaveDateEvent: OnSaveDateEvent
+    private let onSaveEvent: OnSaveTimelineEvent
     
-    init(isPresent: Binding<Bool>, title: String, input: Date, onSaveDateEvent: @escaping OnSaveDateEvent) {
+    init(isPresent: Binding<Bool>, title: String, date: Date, hours: Int, onSaveEvent: @escaping OnSaveTimelineEvent) {
         self._isPresent = isPresent
         self.title = title
-        self.input = input
-        self.onSaveDateEvent = onSaveDateEvent
+        self.date = date
+        self.hours = hours
+        self.onSaveEvent = onSaveEvent
     }
         
     var header: some View {
@@ -47,7 +49,7 @@ struct TimelinePickerSheet: View {
         .padding(.all, 20)
     }
     var textField: some View {
-        DatePicker(title, selection: $input)
+        DatePicker(title, selection: $date)
             .datePickerStyle(.graphical)
             .tint(.black)
             .labelsHidden()
@@ -56,7 +58,7 @@ struct TimelinePickerSheet: View {
     var btnSave: some View {
         Button {
             isPresent = false
-            onSaveDateEvent(input)
+            onSaveEvent(date, hours)
         } label: {
             Text("Save")
                 .font(.title2)
@@ -72,9 +74,34 @@ struct TimelinePickerSheet: View {
     var body: some View {
         VStack(alignment: .leading) {
             header
+            
+            Rectangle()
+                .frame(height: 10)
+                .foregroundStyle(.gray.opacity(0.1))
+            
             textField
                 .padding(.horizontal, 20)
                 .padding(.bottom, 20)
+            
+            Rectangle()
+                .frame(height: 5)
+                .foregroundStyle(.gray.opacity(0.1))
+            
+            Stepper(value: $hours, in: 1...12) {
+                HStack(alignment: .center) {
+                    Text("Duration:")
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                    
+                    Text(hours > 1 ? "\(hours) hours" : "\(hours) hour")
+                        .font(.title2)
+                        .fontWeight(.regular)
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 15)
+            .padding(.bottom, 20)
+
             btnSave
                 .ignoresSafeArea()
         }
@@ -83,7 +110,11 @@ struct TimelinePickerSheet: View {
 }
 
 #Preview {
-    TimelinePickerSheet(isPresent: Binding.constant(false), title: "Set Date", input: Date()) { input in
-        debugPrint(input.formatDate("dd MMM, yy"))
+    TimelinePickerSheet(isPresent: Binding.constant(false),
+                        title: "Set Timeline",
+                        date: Date(),
+                        hours: 2) { date, hours in
+        debugPrint("Date: \(date.formatDate("dd MMM yyyy - hh:mm a"))")
+        debugPrint("Hours: \(hours)")
     }
 }

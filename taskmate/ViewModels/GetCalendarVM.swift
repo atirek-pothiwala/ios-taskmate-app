@@ -28,11 +28,13 @@ class GetCalendarVM: ObservableObject {
     func nextWeek() {
         selectedDate = selectedDate.addingTimeInterval(TimeInterval(+7 * 24 * 60 * 60))
         weeklyDates = selectedDate.getWeeklyDates()
+        getTasks()
     }
     
     func previousWeek() {
         selectedDate = selectedDate.addingTimeInterval(TimeInterval(-7 * 24 * 60 * 60))
         weeklyDates = selectedDate.getWeeklyDates()
+        getTasks()
     }
     
     func getTasks() {
@@ -48,9 +50,24 @@ class GetCalendarVM: ObservableObject {
         )
         do {
             self.tasks = try viewContext.fetch(fetchRequest) as? [TaskEntity] ?? []
+            debugPrint("Tasks: \(tasks.count)")
         } catch let err as NSError {
             print(err.debugDescription)
         }
+    }
+    
+    func filterTasks(_ date: Date) -> [TaskEntity] {
+        let calendar = Calendar.current
+        let startOfDay = calendar.startOfDay(for: date)
+        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
+                
+        return self.tasks.filter { entity in
+            if let dueAt = entity.dueAt {
+                return dueAt >= startOfDay && dueAt < endOfDay
+            }
+            return false
+        }
+        
     }
 }
 

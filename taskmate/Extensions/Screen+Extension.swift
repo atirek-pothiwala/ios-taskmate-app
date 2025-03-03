@@ -7,24 +7,20 @@
 
 import UIKit
 
-extension UIApplication {
+extension UIScreen {
     static func dismissKeyboard(){
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),
                                         to: nil, from: nil, for: nil)
     }
     
-    static func getSafeAreaMargin() -> CGFloat {
-        return safeAreaInsets.bottom + deviceHeight * 0.1
+    static var safeAreaMargin: CGFloat {
+        return safeAreaInsets.bottom + deviceSize.height * 0.1
     }
     
-    static var deviceHeight: CGFloat {
-        return UIScreen.main.bounds.height
+    static var deviceSize: CGRect {
+        return UIScreen.main.bounds
     }
-    
-    static var deviceWidth: CGFloat {
-        return UIScreen.main.bounds.width
-    }
-    
+        
     static var safeAreaInsets: UIEdgeInsets {
         let keyWindow = UIApplication.shared.connectedScenes
             .filter({$0.activationState == .foregroundActive})

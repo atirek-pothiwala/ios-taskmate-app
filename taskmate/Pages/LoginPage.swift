@@ -9,10 +9,11 @@ import SwiftUI
 
 struct LoginPage: View {
     
-    @State private var navigateToDashboard = false
+    @State private var isNavigate = false
     
     var body: some View {
         NavigationStack {
+            
             VStack(alignment: .center, spacing: 30) {
                 
                 ZStack(alignment: .center) {
@@ -32,22 +33,24 @@ struct LoginPage: View {
                         "icScheduleTasks"
                     ])
                 }
-                .frame(minHeight: 200, maxHeight: .infinity)
+                .frame(maxHeight: .infinity)
                 
                 Text("Plan, manage and track tasks")
                     .font(.largeTitle)
                     .fontWeight(.bold)
                     .multilineTextAlignment(.center)
+                    .foregroundStyle(.black)
                 
                 CustomButton(title: "Continue", imageName: "chevron.up.right.dotted.2") {
-                    navigateToDashboard = true
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    isNavigate = true
                 }
             }
             .safeAreaPadding(.all, 30)
             
-            NavigationLink(value: navigateToDashboard) {
+            NavigationLink(value: isNavigate) {
                 EmptyView()
-            }.navigationDestination(isPresented: $navigateToDashboard) {
+            }.navigationDestination(isPresented: $isNavigate) {
                 DashboardPage()
             }
         }

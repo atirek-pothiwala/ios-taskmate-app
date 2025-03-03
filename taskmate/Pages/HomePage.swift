@@ -1,5 +1,5 @@
 //
-//  HomeView.swift
+//  HomePage.swift
 //  taskmate
 //
 //  Created by Atirek Pothiwala on 16/12/24.
@@ -7,52 +7,64 @@
 
 import SwiftUI
 
-struct HomePage: View {
-
-    @State var filterIndex: Int = 0
+struct HomePage: View, OnTaskClick {
+    @StateObject private var viewModel = GetTasksVM()
     
-    var tasks: [TaskModel] {
-        return Constants.allTasks.filter { model in
-            return model.status == filterIndex
-        }
+    @Binding private var isNavigate: Bool
+    @Binding private var selectedTask: TaskEntity?
+    
+    init(isNavigate: Binding<Bool>, selectedTask: Binding<TaskEntity?>) {
+        _isNavigate = isNavigate
+        _selectedTask = selectedTask
     }
     
     var body: some View {
-        NavigationStack {
+        VStack(spacing: 20) {
+            HStack {
+                Text("Tasks")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.black)
+                Spacer()
+            }
             
-            VStack(spacing: 20) {
-                HStack {
-                    Text("Tasks")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                    Spacer()
-                }
-                
-                FilterView(currentIndex: filterIndex, items: [
-                    "To Do", "In Progress", "Done"
-                ]) { index in
-                    filterIndex = index
-                }
-             
-                ScrollView(.vertical) {
+            FilterView(currentIndex: viewModel.status, items: viewModel.filters) { index in
+                viewModel.status = index
+                viewModel.getTasks()
+            }
+            
+            if viewModel.tasks.isEmpty {
+                Text("No tasks found")
+                    .font(.callout)
+                    .frame(maxHeight: .infinity, alignment: .center)
+                    .padding(.bottom, UIScreen.safeAreaMargin)
+            } else {
+                ScrollView(.vertical, showsIndicators: false) {
                     VStack(spacing: 15) {
-                        ForEach(Array(tasks.enumerated()), id: \.offset) { index, item in
-                         
-                            TaskCell(model: item) {
-                                debugPrint("Click on Task: \(item.title)")
-                            }
+                        ForEach(viewModel.tasks, id: \.self) { item in
+                            TaskCell(entity: item, onTaskClick: self)
                         }
                     }
-                    .padding(.bottom, Constants.safeAreaBottom + Constants.deviceHeight * 0.2)
-                    
+                    .padding(.bottom, UIScreen.safeAreaMargin)
                 }
                 .scrollBounceBehavior(.basedOnSize, axes: .vertical)
-                .scrollIndicators(.never)
-            }.safeAreaPadding(.all, 20)
+
+            }
+            
+        }
+        .safeAreaPadding(.all, 20)
+        .onAppear {
+            viewModel.getTasks()
         }
     }
-}
-
-#Preview {
-    HomePage()
+    
+    func onTaskTap(_ entity: TaskEntity) {
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        self.selectedTask = entity
+        self.isNavigate = true
+    }
+    
+    func onTaskLongPress(_ entity: TaskEntity) {
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+    }
 }
