@@ -50,7 +50,6 @@ class GetCalendarVM: ObservableObject {
         )
         do {
             self.tasks = try viewContext.fetch(fetchRequest) as? [TaskEntity] ?? []
-            debugPrint("Tasks: \(tasks.count)")
         } catch let err as NSError {
             print(err.debugDescription)
         }
